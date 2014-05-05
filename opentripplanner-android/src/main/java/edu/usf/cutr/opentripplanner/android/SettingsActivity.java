@@ -49,19 +49,11 @@ import edu.usf.cutr.opentripplanner.android.util.ConversionUtils;
 /*
  * Modified by Khoa Tran
  */
-public class SettingsActivity extends PreferenceActivity implements ServerCheckerCompleteListener {
+public class SettingsActivity extends PreferenceActivity  {
 
     private ListPreference mapTileProvider;
 
-    private CheckBoxPreference autoDetectServer;
-
-    private EditTextPreference customServerURL;
-
     private Preference providerFeedbackButton;
-
-    private Preference serverRefreshButton;
-
-    private CheckBoxPreference selectedCustomServer;
 
     private ListPreference geocoderProvider;
 
@@ -86,12 +78,6 @@ public class SettingsActivity extends PreferenceActivity implements ServerChecke
 
         mapTileProvider = (ListPreference) findPreference(OTPApp.PREFERENCE_KEY_MAP_TILE_SOURCE);
         geocoderProvider = (ListPreference) findPreference(OTPApp.PREFERENCE_KEY_GEOCODER_PROVIDER);
-        autoDetectServer = (CheckBoxPreference) findPreference(
-                OTPApp.PREFERENCE_KEY_AUTO_DETECT_SERVER);
-        customServerURL = (EditTextPreference) findPreference(
-                OTPApp.PREFERENCE_KEY_CUSTOM_SERVER_URL);
-        selectedCustomServer = (CheckBoxPreference) findPreference(
-                OTPApp.PREFERENCE_KEY_SELECTED_CUSTOM_SERVER);
         maxWalkingDistance = (EditTextPreference) findPreference(
                 OTPApp.PREFERENCE_KEY_MAX_WALKING_DISTANCE);
 
@@ -227,92 +213,6 @@ public class SettingsActivity extends PreferenceActivity implements ServerChecke
 
         });
 
-        if (prefs.getBoolean(OTPApp.PREFERENCE_KEY_CUSTOM_SERVER_URL_IS_VALID, false)) {
-            customServerURL
-                    .setSummary(getResources().getString(R.string.settings_menu_custom_server_url_description));
-        } else {
-            selectedCustomServer.setEnabled(false);
-            customServerURL.setSummary(getResources().getString(R.string.settings_menu_custom_server_url_description_error_url));
-        }
-
-        if (selectedCustomServer.isEnabled() && selectedCustomServer.isChecked()) {
-            autoDetectServer.setEnabled(false);
-        }
-
-        selectedCustomServer.setDependency(OTPApp.PREFERENCE_KEY_CUSTOM_SERVER_URL);
-
-        customServerURL.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
-
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                String value = (String) newValue;
-
-                if (URLUtil.isValidUrl(value)) {
-                    WeakReference<Activity> weakContext = new WeakReference<Activity>(
-                            SettingsActivity.this);
-                    ServerChecker serverChecker = new ServerChecker(weakContext,
-                            SettingsActivity.this.getApplicationContext(), SettingsActivity.this,
-                            false);
-                    serverChecker.execute(
-                            new Server(value, SettingsActivity.this.getApplicationContext()));
-                    return true;
-                }
-
-                Toast.makeText(SettingsActivity.this.getApplicationContext(),
-                        SettingsActivity.this.getApplicationContext().getResources()
-                                .getString(R.string.settings_menu_custom_server_url_description_error_url), Toast.LENGTH_SHORT
-                )
-                        .show();
-
-                customServerURL
-                        .setSummary(getResources().getString(R.string.settings_menu_custom_server_url_description_error_url));
-
-                setResult(RESULT_OK, returnIntent);
-                return false;
-            }
-        });
-
-        selectedCustomServer.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
-
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Boolean value = (Boolean) newValue;
-                if (value) {
-                    autoDetectServer.setChecked(false);
-                    autoDetectServer.setEnabled(false);
-                } else {
-                    autoDetectServer.setEnabled(true);
-                }
-
-                Log.v(OTPApp.TAG, "Custom server Button clicked");
-
-                returnIntent.putExtra(OTPApp.CHANGED_SELECTED_CUSTOM_SERVER_RETURN_KEY, true);
-                setResult(RESULT_OK, returnIntent);
-
-                return true;
-            }
-        });
-
-        autoDetectServer.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
-
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                Boolean value = (Boolean) newValue;
-                SharedPreferences prefs = PreferenceManager
-                        .getDefaultSharedPreferences(getApplicationContext());
-
-                if (value) {
-                    selectedCustomServer.setEnabled(false);
-                } else {
-                    if (prefs.getBoolean(OTPApp.PREFERENCE_KEY_CUSTOM_SERVER_URL_IS_VALID, false)) {
-                        selectedCustomServer.setEnabled(true);
-                    }
-                }
-
-                return true;
-            }
-        });
-
         providerFeedbackButton = (Preference) findPreference(
                 OTPApp.PREFERENCE_KEY_OTP_PROVIDER_FEEDBACK);
         providerFeedbackButton
@@ -345,66 +245,8 @@ public class SettingsActivity extends PreferenceActivity implements ServerChecke
         datasource.open();
         Long mostRecentDate = datasource.getMostRecentDate();
 
-        serverRefreshButton = (Preference) findPreference(
-                OTPApp.PREFERENCE_KEY_REFRESH_SERVER_LIST);
-
-        if (mostRecentDate != null) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(mostRecentDate);
-            serverRefreshButton.setSummary(
-                    getResources().getString(R.string.settings_menu_server_list_download_date_description)
-                            + ConversionUtils.getTimeWithContext(this.getApplicationContext(),
-                            cal.getTimeZone().getOffset(cal.getTimeInMillis()),
-                            cal.getTimeInMillis(), true)
-            );
-        } else {
-            serverRefreshButton.setSummary(
-                    getResources().getString(R.string.settings_menu_server_list_download_date_unknown));
-        }
-
-        serverRefreshButton
-                .setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(Preference arg0) {
-                        Log.v(OTPApp.TAG, "Server Refresh Button clicked");
-
-                        returnIntent.putExtra(OTPApp.REFRESH_SERVER_RETURN_KEY, true);
-                        setResult(RESULT_OK, returnIntent);
-                        finish();
-                        return true;
-                    }
-                });
-
         datasource.close();
     }
-
-
-    @Override
-    public void onServerCheckerComplete(String result, boolean isWorking) {
-        SharedPreferences.Editor prefsEditor = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext()).edit();
-        if (isWorking) {
-            autoDetectServer.setChecked(false);
-            autoDetectServer.setEnabled(false);
-            selectedCustomServer.setEnabled(true);
-            selectedCustomServer.setChecked(true);
-            returnIntent.putExtra(OTPApp.CHANGED_SELECTED_CUSTOM_SERVER_RETURN_KEY, true);
-            setResult(RESULT_OK, returnIntent);
-            customServerURL
-                    .setSummary(getResources().getString(R.string.settings_menu_custom_server_url_description));
-            prefsEditor.putBoolean(OTPApp.PREFERENCE_KEY_CUSTOM_SERVER_URL_IS_VALID, true);
-        } else {
-            autoDetectServer.setEnabled(true);
-            selectedCustomServer.setChecked(false);
-            selectedCustomServer.setEnabled(false);
-            customServerURL.setSummary(getResources().getString(R.string.settings_menu_custom_server_url_description_error_unreachable));
-            prefsEditor.putBoolean(OTPApp.PREFERENCE_KEY_CUSTOM_SERVER_URL_IS_VALID, false);
-            prefsEditor.putBoolean(OTPApp.PREFERENCE_KEY_SELECTED_CUSTOM_SERVER, false);
-        }
-
-        prefsEditor.commit();
-    }
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {

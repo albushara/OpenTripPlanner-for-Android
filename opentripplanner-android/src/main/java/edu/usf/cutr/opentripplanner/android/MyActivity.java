@@ -110,13 +110,6 @@ public class MyActivity extends FragmentActivity implements OtpFragment {
                             .getBooleanExtra(OTPApp.CHANGED_MAP_TILE_PROVIDER_RETURN_KEY, false);
 
                     //				Toast.makeText(this, "Should server list refresh? " + shouldRefresh, Toast.LENGTH_LONG).show();
-                    if (shouldRefresh) {
-                        mainFragment.setNeedToRunAutoDetect(true);
-                        mainFragment.setNeedToUpdateServersList(true);
-                    }
-                    if (changedSelectedCustomServer) {
-                        mainFragment.updateSelectedServer();
-                    }
                     if (changedTileProvider) {
                         mainFragment.updateOverlay(null);
                     }

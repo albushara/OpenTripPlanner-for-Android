@@ -32,21 +32,6 @@
                 android:key="use_device_timezone"
                 android:defaultValue="false"
                 android:summary="@string/settings_menu_use_device_timezone_description"></CheckBoxPreference>
-        <PreferenceScreen
-                android:title="@string/settings_menu_advanced"
-                android:summary="@string/settings_menu_location_advanced_preference_category_summary"
-                android:key="location_advanced_preference_category">
-            <EditTextPreference
-                    android:key="custom_server_url"
-                    android:title="@string/settings_menu_custom_server_url"
-                    android:inputType="text|textNoSuggestions"
-                    android:hint="@string/custom_server_url_hint"></EditTextPreference>
-            <CheckBoxPreference
-                    android:title="@string/settings_menu_custom_server_select_title"
-                    android:key="selected_custom_server"
-                    android:defaultValue="false"
-                    android:summary="@string/settings_menu_custom_server_select_description"></CheckBoxPreference>
-        </PreferenceScreen>
     </PreferenceCategory>
     <PreferenceCategory
             android:title="@string/settings_menu_map_options"
