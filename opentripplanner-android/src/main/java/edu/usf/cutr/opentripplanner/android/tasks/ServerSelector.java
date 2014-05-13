@@ -299,8 +299,8 @@ public class ServerSelector extends AsyncTask<LatLng, Integer, Integer>
     }
 
     /**
-     * Automatically detects the correct OTP server based on the location of the device
-     *
+     * Automatically detects the correct OTP server based on the f the device
+     *location o
      * @param currentLocation location of the device
      * @return Server the OTP server that the location is within
      */

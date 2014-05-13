@@ -45,7 +45,7 @@ public class GooglePlaces implements Places {
 
     private String request = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
 
-    private String apiKey;
+    private String apiKey = "AIzaSyDdo82fZWpkDuBhSuhOM46wcX1PlDDETB0";
 
     public static final String PARAM_LOCATION = "location";
 

@@ -26,35 +26,25 @@ apply plugin: 'android'
 
 repositories {
     mavenCentral()
-    maven {
-        // CUTR SNAPSHOTs
-        url "https://github.com/CUTR-at-USF/cutr-mvn-repo/raw/master/snapshots"
-    }
-    maven {
-        // CUTR Releases
-        url "https://github.com/CUTR-at-USF/cutr-mvn-repo/raw/master/releases"
-    }
+    maven { url 'https://github.com/CUTR-at-USF/cutr-mvn-repo/raw/master/snapshots' }
+    maven { url 'https://github.com/CUTR-at-USF/cutr-mvn-repo/raw/master/releases' }
 }
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.1"
-
+    buildToolsVersion '19.0.1'
     defaultConfig {
         minSdkVersion 8
         targetSdkVersion 13
     }
-
     // http://stackoverflow.com/questions/20673625/gradle-0-7-0-duplicate-files-during-packaging-of-apk
     packagingOptions {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'
     }
-
     lintOptions {
         disable 'MissingTranslation', 'ExtraTranslation'
     }
-
     if (project.hasProperty("secure.properties")
             && new File(project.property("secure.properties")).exists()) {
 
@@ -84,10 +74,17 @@ android {
             }
         }
     }
-
     buildTypes {
         release {
             signingConfig signingConfigs.release
+        }
+    }
+    signingConfigs {
+        Debug {
+            keyAlias 'tmp'
+            keyPassword 'albert'
+            storeFile file('C:/Users/Albert/mykey.keystore')
+            storePassword 'albert'
         }
     }
 }
